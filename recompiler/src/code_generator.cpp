@@ -798,7 +798,9 @@ std::string CodeGenerator::generate_branch_condition(uint32_t instr, uint32_t ad
     for (const auto& site : config_.ws_cull_masked_reject_sites) {
         if ((site.address & 0x1FFFFFFFu) != (addr & 0x1FFFFFFFu)) continue;
         if (site.expected != instr) {
-            if (config_.overlay_mode) continue;
+            // A zero word is padding the main image ships under an overlay
+            // window; the overlay compile checks the site's real instruction.
+            if (config_.overlay_mode || instr == 0) continue;
             fmt::print(stderr, "ERROR: masked_reject instruction mismatch at 0x{:08X}\n", addr);
             std::exit(1);
         }
@@ -1507,7 +1509,8 @@ std::string CodeGenerator::translate_instruction_core(uint32_t addr, uint32_t in
             return fmt::format("{} = psx_ws_cull_lui_hi(0x{:04X}u);"
                                " /* ws explicit screen-x edge (high half) */{}",
                                reg_name(rt), imm, comment);
-        } else if (!config_.overlay_mode) {
+        } else if (!config_.overlay_mode && instr != 0) {
+            // Zero is overlay-window padding in the main image (see masked_reject).
             fmt::print(stderr, "ERROR: [widescreen.cull] screen_x site 0x{:08X} "
                        "is not sltiu, sltu, lui or bltz (0x{:08X})\n", addr, instr);
             std::exit(1);
