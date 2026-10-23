@@ -1504,6 +1504,20 @@ extern "C" void psx_mod_set_rewind_blocked(int blocked) {
     psx_rewind_set_title_blocked(blocked);
 }
 
+/* psx_mod_set_fps_readout: the FPS readout hotkey's state, set without its
+ * toast. The hotkey and PSX_FPS_TELEMETRY keep working on top of it. */
+extern "C" void psx_mod_set_fps_readout(int enabled) {
+    if ((fps_telemetry_enabled() != 0) == (enabled != 0)) return;
+    s_fps_telemetry_enabled = enabled ? 1 : 0;
+    s_fps_last_time = 0;
+    s_fps_last_frame = 0;
+    if (!enabled && sdl_window && !s_fps_base_title.empty())
+        SDL_SetWindowTitle(sdl_window, s_fps_base_title.c_str());
+    if (!enabled)
+        host_osd_set_status(NULL);
+    s_fps_base_title.clear();
+}
+
 /* psx_mod_set_host_rumble: per-seat title rumble, stamped with the rumble
  * VBlank so a value the mod stops refreshing lapses (psx_host_rumble.h). */
 static PsxHostRumbleSlot g_mod_rumble[PSX_MAX_PLAYERS];

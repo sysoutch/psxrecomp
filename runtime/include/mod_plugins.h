@@ -900,6 +900,9 @@ uint32_t psx_mod_render_pass_frame(struct CPUState* cpu,
 int psx_mod_run_guest_span(struct CPUState* cpu, uint32_t start_pc,
                            uint32_t stop_pc);
 int psx_mod_set_auto_skip_fmv(int enabled);
+/* Turn the on-screen FPS readout (the "FPS readout" hotkey's display) on or
+ * off, e.g. from an activation callback. The hotkey still toggles it. */
+void psx_mod_set_fps_readout(int enabled);
 /*
  * Draw still artwork behind the game image in OpenGL letterbox/pillarbox
  * margins. The image path is an owner-selected mod resource; with no enabled
